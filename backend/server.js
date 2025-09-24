@@ -36,7 +36,7 @@ const httpServer = createServer(app);
 const PORT = process.env.PORT || 3001;
 
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:3000", "http://localhost:3001"],
+  origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:3000", "http://localhost:3001" , "https://hierai-frontend.onrender.com"],
   credentials: true,
 }));
 app.use(express.json({ limit: "200mb" }));
@@ -63,7 +63,7 @@ app.use("/api/v1/schedule", scheduleRoutes);
 // Socket.io
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:3000"],
+    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:3000" , "https://hierai-frontend.onrender.com"],
     credentials: true,
   }
 });
