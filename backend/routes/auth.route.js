@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import {signup,login,logout,getCurrentUser} from "../controllers/auth.controller.js" ;
 import {protectRoute} from "../middleware/auth.middleware.js";
 const router = express.Router();
+const isProd = process.env.NODE_ENV === "production";
 router.post("/signup",signup);
 router.post("/login",login);
 router.post("/logout",logout);
@@ -48,10 +49,10 @@ router.get('/google/callback', (req,res,next)=>{
   res.cookie('hierai', token, {
     httpOnly: true,
     maxAge: 3*24*60*60*1000,
-    sameSite: 'strict',
-    secure: process.env.NODE_ENV === 'production',
+    sameSite: isProd ? 'none' : 'lax',
+    secure: isProd,
   })
-  res.redirect(process.env.CLIENT_URL || 'http://localhost:5173')
+  res.redirect(process.env.CLIENT_URL || 'https://hierai-frontend.onrender.com')
 })
 
 // Twitter callback (kept for signup)
@@ -65,10 +66,10 @@ router.get('/twitter/callback', (req,res,next)=>{
   res.cookie('hierai', token, {
     httpOnly: true,
     maxAge: 3*24*60*60*1000,
-    sameSite: 'strict',
-    secure: process.env.NODE_ENV === 'production',
+    sameSite: isProd ? 'none' : 'lax',
+    secure: isProd,
   })
-  res.redirect(process.env.CLIENT_URL || 'http://localhost:5173')
+  res.redirect(process.env.CLIENT_URL || 'https://hierai-frontend.onrender.com')
 })
 
 router.get("/me",protectRoute,getCurrentUser)
