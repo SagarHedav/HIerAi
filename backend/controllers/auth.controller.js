@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { sendWelcomeEmail } from "../emails/emailHandlers.js";
 //alternative name of this file is user.controller.js according to another video
+const isProd = process.env.NODE_ENV === "production";
 export const signup = async (req, res) => {
 	try {
 		const { name, username, email, password ,phoneNumber , role} = req.body;
@@ -43,8 +44,8 @@ export const signup = async (req, res) => {
 		res.cookie("hierai", token, {
 			httpOnly: true, // prevent XSS attack
 			maxAge: 3 * 24 * 60 * 60 * 1000,
-			sameSite: "strict", // prevent CSRF attacks,
-			secure: process.env.NODE_ENV === "production", // prevents man-in-the-middle attacks
+			sameSite: isProd ? "none" : "lax", // cross-site cookies in production
+			secure: isProd, // prevents man-in-the-middle attacks
 		});
 
 		res.status(201).json({ message: "User registered successfully" });
@@ -92,8 +93,8 @@ export const login = async (req, res) => {
 		await res.cookie("hierai", token, {
 			httpOnly: true,
 			maxAge: 3 * 24 * 60 * 60 * 1000,
-			sameSite: "strict",
-			secure: process.env.NODE_ENV === "production",
+			sameSite: isProd ? "none" : "lax",
+			secure: isProd,
 		});
 
 		res.json({ message: "Logged in successfully" });
@@ -104,7 +105,7 @@ export const login = async (req, res) => {
 };
 
 export const logout = (req, res) => {
-	res.clearCookie("hierai");
+	res.clearCookie("hierai", { sameSite: isProd ? "none" : "lax", secure: isProd });
 	res.json({ message: "Logged out successfully" });
 };
 
