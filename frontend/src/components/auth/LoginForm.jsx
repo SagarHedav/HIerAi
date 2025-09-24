@@ -71,7 +71,7 @@ const LoginForm = () => {
                 onClick={() => {
                   if (!oauthGoogle) return
                   const r = role || 'student'
-                  const ORIGIN = import.meta.env.MODE === 'development' ? 'http://localhost:3001' : ''
+                  const ORIGIN = import.meta.env.MODE === 'development' ? 'http://localhost:3001' : 'https://hierai.onrender.com'
                   window.location.href = `${ORIGIN}/api/v1/auth/google?role=${encodeURIComponent(r)}`
                 }}
               >Continue with Google</button>
