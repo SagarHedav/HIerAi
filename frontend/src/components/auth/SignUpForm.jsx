@@ -104,7 +104,7 @@ const SignUpForm = () => {
           onClick={() => {
             if (!oauth.google) return
             const r = role || 'student'
-            const ORIGIN = import.meta.env.MODE === 'development' ? 'http://localhost:3001' : ''
+            const ORIGIN = import.meta.env.MODE === 'development' ? 'http://localhost:3001' : 'https://hierai.onrender.com'
             window.location.href = `${ORIGIN}/api/v1/auth/google?role=${encodeURIComponent(r)}`
           }}
         >Continue with Google</button>
@@ -112,7 +112,7 @@ const SignUpForm = () => {
           onClick={() => {
             if (!oauth.twitter) return
             const r = role || 'student'
-            const ORIGIN = import.meta.env.MODE === 'development' ? 'http://localhost:3001' : ''
+            const ORIGIN = import.meta.env.MODE === 'development' ? 'http://localhost:3001' : 'https://hierai.onrender.com'
             window.location.href = `${ORIGIN}/api/v1/auth/twitter?role=${encodeURIComponent(r)}`
           }}
         >Continue with Twitter</button>
