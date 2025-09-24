@@ -35,8 +35,18 @@ const app = express();
 const httpServer = createServer(app);
 const PORT = process.env.PORT || 3001;
 
+const FRONTEND_URL = process.env.CLIENT_URL || "https://hierai-frontend.onrender.com";
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:5175",
+  "http://localhost:3000",
+  "http://localhost:3001",
+  FRONTEND_URL,
+];
+
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:3000", "http://localhost:3001" , "https://hierai-frontend.onrender.com"],
+  origin: allowedOrigins,
   credentials: true,
 }));
 app.use(express.json({ limit: "200mb" }));
@@ -60,10 +70,14 @@ app.use("/api/v1/application", applicationRoute);
 app.use("/api/v1/messages", messageRoutes);
 app.use("/api/v1/schedule", scheduleRoutes);
 
+// Root and health endpoints
+app.get("/", (_req, res) => res.send("HIerAi API is running"));
+app.get("/api/v1/health", (_req, res) => res.status(200).json({ status: "ok", uptime: process.uptime() }));
+
 // Socket.io
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:3000" , "https://hierai-frontend.onrender.com"],
+    origin: allowedOrigins,
     credentials: true,
   }
 });
