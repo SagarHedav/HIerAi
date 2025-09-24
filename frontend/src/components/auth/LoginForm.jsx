@@ -58,8 +58,8 @@ const LoginForm = () => {
                 required
               >
                 <option value='' disabled>Select role</option>
-                <option value='student'>Student</option>
-                <option value='recruiter'>Recruiter</option>
+                <option value='student'>student</option>
+                <option value='recruiter'>recruiter</option>
               </select>
 
             <button type='submit' className='btn btn-primary w-full'>
