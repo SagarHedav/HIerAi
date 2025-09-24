@@ -4,7 +4,7 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { Image, Loader } from "lucide-react";
 
-const PostCreation = ({ user }) => {
+const PostCreation = ({ user, invalidateKeys = [["posts"]] }) => {
     const [content, setContent] = useState("");
     const [image, setImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
@@ -18,10 +18,10 @@ const PostCreation = ({ user }) => {
             });
             return res.data;
         },
-        onSuccess: () => {
+onSuccess: () => {
             resetForm();
             toast.success("Post created successfully");
-            queryClient.invalidateQueries({ queryKey: ["posts"] });
+            for (const key of invalidateKeys) queryClient.invalidateQueries({ queryKey: key });
         },
         onError: (err) => {
             toast.error(err.response.data.message || "Failed to create post");

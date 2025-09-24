@@ -1,12 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios";
-import Sidebar from "../components/SideBar";
+import Sidebar from "../components/Sidebar";
 import { UserPlus } from "lucide-react";
 import FriendRequest from "../components/FriendRequest";
 import UserCard from "../components/UserCard";
 
 const NetworkPage = () => {
-	const { data: user } = useQuery({ queryKey: ["authUser"] });
+	const { data: user } = useQuery({ 
+		queryKey: ["authUser"],
+		queryFn: async () => {
+		  try {
+		    const res = await axiosInstance.get("/auth/me");
+		    return res.data;
+		  } catch (err) {
+		    if (err.response && err.response.status === 401) {
+		      return null;
+		    }
+		    throw err;
+		  }
+		},
+	});
 
 	const { data: connectionRequests } = useQuery({
 		queryKey: ["connectionRequests"],
@@ -29,7 +42,15 @@ const NetworkPage = () => {
 
 					{connectionRequests?.data?.length > 0 ? (
 						<div className='mb-8'>
-							<h2 className='text-xl font-semibold mb-2'>Connection Request</h2>
+							<div className='flex items-center justify-between mb-2'>
+								<h2 className='text-xl font-semibold'>Connection Request</h2>
+								<button
+									className='btn btn-sm btn-success'
+									onClick={async ()=>{ try { await axiosInstance.put('/connections/accept-all'); window.location.reload(); } catch {} }}
+								>
+									Accept all
+								</button>
+							</div>
 							<div className='space-y-4'>
 								{connectionRequests.data.map((request) => (
 									<FriendRequest key={request.id} request={request} />

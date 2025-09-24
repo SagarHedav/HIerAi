@@ -15,10 +15,20 @@
     "build": "npm run build --workspace=frontend",
     "install:all": "npm install && npm install --workspace=backend && npm install --workspace=frontend"
   },
-  "keywords": ["networking", "jobs", "professional", "social", "recruitment"],
+  "keywords": [
+    "networking",
+    "jobs",
+    "professional",
+    "social",
+    "recruitment"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   }
 }

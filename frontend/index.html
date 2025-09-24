@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/small-logo.png" />
@@ -8,6 +8,14 @@
     <meta name="keywords" content="networking, jobs, career, professional, recruitment, students" />
     <meta name="author" content="HIerAi Team" />
     <title>HIerAi - Professional Networking Platform</title>
+    <script>
+      (function(){
+        try {
+          var t = localStorage.getItem('theme');
+          if (t) document.documentElement.setAttribute('data-theme', t);
+        } catch(e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

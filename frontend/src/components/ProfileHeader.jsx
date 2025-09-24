@@ -2,15 +2,30 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { axiosInstance } from "../lib/axios";
 import { toast } from "react-hot-toast";
+import { useNavigate } from 'react-router-dom'
 
-import { Camera, Clock, MapPin, UserCheck, UserPlus, X } from "lucide-react";
+import { Camera, Clock, MapPin, UserCheck, UserPlus, X, MessageCircle } from "lucide-react";
 
 const ProfileHeader = ({ userData, onSave, isOwnProfile }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editedData, setEditedData] = useState({});
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
-    const { data: authUser } = useQuery({ queryKey: ["authUser"] });
+    const { data: authUser } = useQuery({ 
+        queryKey: ["authUser"],
+        queryFn: async () => {
+          try {
+            const res = await axiosInstance.get("/auth/me");
+            return res.data;
+          } catch (err) {
+            if (err.response && err.response.status === 401) {
+              return null;
+            }
+            throw err;
+          }
+        },
+    });
 
     const { data: connectionStatus, refetch: refetchConnectionStatus } = useQuery({
         queryKey: ["connectionStatus", userData._id],
@@ -18,7 +33,10 @@ const ProfileHeader = ({ userData, onSave, isOwnProfile }) => {
         enabled: !isOwnProfile,
     });
 
-    const isConnected = userData.connections.some((connection) => connection === authUser._id);
+    const isConnected = Array.isArray(userData?.connections) && userData.connections.some((c) => {
+        const id = typeof c === 'string' ? c : c?._id
+        return id === authUser?._id
+    });
 
     const { mutate: sendConnectionRequest } = useMutation({
         mutationFn: (userId) => axiosInstance.post(`/connections/request/${userId}`),
@@ -70,9 +88,20 @@ const ProfileHeader = ({ userData, onSave, isOwnProfile }) => {
 
     const getConnectionStatus = useMemo(() => {
         if (isConnected) return "connected";
-        if (!isConnected) return "not_connected";
-        return connectionStatus?.data?.status;
+        if (connectionStatus?.data?.status) return connectionStatus.data.status;
+        return "not_connected";
     }, [isConnected, connectionStatus]);
+
+    const { mutate: openConversation, isPending: isOpeningConvo } = useMutation({
+        mutationFn: async () => {
+            const res = await axiosInstance.post(`/messages/conversations/with/${userData._id}`)
+            return res.data
+        },
+        onSuccess: (convo) => {
+            navigate('/messages', { state: { openConvoId: convo._id, newConvo: convo } })
+        },
+        onError: (e) => toast.error('Failed to open conversation')
+    })
 
     const renderConnectionButton = () => {
         const baseClass = "text-white py-2 px-4 rounded-full transition duration-300 flex items-center justify-center";
@@ -230,6 +259,23 @@ const ProfileHeader = ({ userData, onSave, isOwnProfile }) => {
                     </div>
                 </div>
 
+                {!isOwnProfile && (
+                    <div className='flex flex-wrap gap-2 justify-center mb-4'>
+                        {renderConnectionButton()}
+                        <button className='btn btn-circle btn-ghost btn-sm p-0' title='Message' aria-label='Message' onClick={()=>openConversation()} disabled={isOpeningConvo}>
+<MessageCircle size={20} />
+                        </button>
+                        <button className='btn btn-ghost btn-sm' onClick={async ()=>{
+                          try {
+                            const res = await axiosInstance.post(`/users/intro-suggest/${userData._id}`)
+                            const text = res.data?.intro || ''
+                            await navigator.clipboard.writeText(text)
+                            toast.success('Intro copied to clipboard')
+                          } catch (e) { toast.error('Failed to suggest intro') }
+                        }}>Suggest intro</button>
+                    </div>
+                )}
+
                 {isOwnProfile ? (
                     isEditing ? (
                         <button
@@ -249,7 +295,7 @@ const ProfileHeader = ({ userData, onSave, isOwnProfile }) => {
                         </button>
                     )
                 ) : (
-                    <div className='flex justify-center'>{renderConnectionButton()}</div>
+                    null
                 )}
             </div>
         </div>

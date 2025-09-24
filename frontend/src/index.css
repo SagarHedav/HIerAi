@@ -1,4 +1,123 @@
-@import "tailwindcss";
-@plugin "daisyui"{
-    themes: dark --prefersdark;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Like animation */
+@keyframes like-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.6); }
+  100% { transform: scale(1); }
+}
+.animate-like {
+  animation: like-pop 450ms ease-out;
+}
+
+@keyframes like-particle {
+  0% { transform: translate(0, 0); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)); opacity: 0; }
+}
+.like-particle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  margin-top: -3px;
+  border-radius: 9999px;
+  background: currentColor;
+  animation: like-particle 600ms ease-out forwards;
+  pointer-events: none;
+}
+
+/* Floating hearts burst (radial outward) */
+@keyframes like-heart-burst {
+  0%   { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  30%  { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px))) scale(var(--scale, 1)); opacity: 0; }
+}
+.like-heart-burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  color: currentColor;
+  pointer-events: none;
+  animation: like-heart-burst var(--dur, 750ms) ease-out var(--delay, 0ms) forwards;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-like { animation: none; }
+  .like-particle { animation-duration: 0ms; opacity: 0; }
+  .like-heart-burst { animation-duration: 450ms; }
+}
+
+/* Mobile chat improvements */
+@media (max-width: 640px) {
+  .chat {
+    margin-bottom: 1.5rem !important;
+  }
+  
+  .chat-bubble {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+  
+  /* Ensure timestamps don't overflow on very small screens */
+  .chat .text-\[10px\] {
+    font-size: 10px;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* Force long unbroken words to wrap inside message content */
+.msg-anywhere {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* Minimal custom chat components (no DaisyUI dependency for layout) */
+.msg-row { display: flex; align-items: flex-end; }
+.msg-row.me { flex-direction: row-reverse; }
+.msg-avatar { width: 2rem; height: 2rem; border-radius: 50%; flex: 0 0 auto; }
+.msg-wrap { position: relative; margin: 0%; }
+.msg-bubble { margin: 0; white-space: pre-wrap; }
+/* Constrain inline quoted reply so it doesn't dictate bubble width */
+.reply-box { max-width: 20rem; width: 100%; }
+
+/* Keep avatar-to-bubble gap constant regardless of bubble width */
+/* Switch chat rows to flexbox so the gap stays constant and ordering is predictable */
+.chat.chat-start, .chat.chat-end {
+  display: flex !important;
+  align-items: flex-end !important;
+}
+.chat.chat-start {
+  flex-direction: row !important;
+  justify-content: flex-start !important; /* anchor to left */
+}
+.chat.chat-end {
+  flex-direction: row-reverse !important; /* avatar on the far right */
+  justify-content: flex-start !important; /* row-reverse + flex-start anchors to right */
+}
+
+/* Ensure children do not grow or push each other with auto margins */
+.chat > * {
+  flex: 0 0 auto !important;
+}
+.chat .chat-bubble,
+.chat .chat-image {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+.chat.chat-end .chat-bubble,
+.chat.chat-end .chat-image,
+.chat.chat-start .chat-bubble,
+.chat.chat-start .chat-image {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }

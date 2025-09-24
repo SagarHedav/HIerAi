@@ -32,6 +32,17 @@ export const protectRoute = async (req, res, next) => {
 		next();
 	} catch (error) {
 		console.log("Error in protectRoute middleware:", error.message);
+		// If DB is not reachable or DNS fails, surface 503 instead of 401
+		const msg = String(error?.message || '').toLowerCase()
+		const isDbOffline =
+			msg.includes('enotfound') ||
+			msg.includes('econnrefused') ||
+			msg.includes('timed out') ||
+			(error?.name || '').toLowerCase().includes('mongonetwork') ||
+			(error?.name || '').toLowerCase().includes('mongoserverselection')
+		if (isDbOffline) {
+			return res.status(503).json({ message: 'Database not reachable. Please try again shortly.' })
+		}
 		res.status(401).json({ message: "Unauthorized - Invalid or Expired Token" });
 	}
 };

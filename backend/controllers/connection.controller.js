@@ -135,6 +135,26 @@ export const getConnectionRequests = async (req, res) => {
 	}
 };
 
+export const acceptAllConnectionRequests = async (req, res) => {
+	try {
+		const userId = req.user._id;
+		const requests = await ConnectionRequest.find({ recipient: userId, status: 'pending' }).populate('sender', 'name email username');
+		for (const reqDoc of requests) {
+			reqDoc.status = 'accepted';
+			await reqDoc.save();
+			await User.findByIdAndUpdate(reqDoc.sender._id, { $addToSet: { connections: userId } });
+			await User.findByIdAndUpdate(userId, { $addToSet: { connections: reqDoc.sender._id } });
+			try {
+				await new Notification({ recipient: reqDoc.sender._id, type: 'connectionAccepted', relatedUser: userId }).save();
+			} catch {}
+		}
+		res.json({ accepted: requests.length });
+	} catch (e) {
+		console.error('acceptAllConnectionRequests error', e);
+		res.status(500).json({ message: 'Server error' });
+	}
+};
+
 export const getUserConnections = async (req, res) => {
 	try {
 		const userId = req.user._id;

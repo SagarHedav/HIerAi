@@ -1,6 +1,15 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
+    provider: {
+        type: String,
+        enum: ['local','google','twitter'],
+        default: 'local',
+    },
+    providerId: {
+        type: String,
+        default: '',
+    },
     name: {
         type: String,
         required: true,
@@ -12,7 +21,8 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
+        required: function() { return this.provider === 'local'; },
+        default: '',
     },
     location: {
         type: String,
@@ -70,10 +80,20 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,    
         ref: "User",
     }],
+    bookmarks: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Post",
+    }],
     phoneNumber: {
         type: String,
         default: "",
-    }
+    },
+    availabilitySlots: [{
+        dayOfWeek: { type: Number, min: 0, max: 6 },
+        start: String, // '09:00'
+        end: String,   // '12:00'
+        durationMin: { type: Number, default: 30 }
+    }]
 }, {
     timestamps: true,
 });

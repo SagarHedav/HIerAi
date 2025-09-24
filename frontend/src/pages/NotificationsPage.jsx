@@ -1,13 +1,26 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios";
 import { toast } from "react-hot-toast";
-import { ExternalLink, Eye, MessageSquare, ThumbsUp, Trash2, UserPlus } from "lucide-react";
+import { ExternalLink, Eye, MessageSquare, ThumbsUp, Trash2, UserPlus, Briefcase, CheckCircle, XCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-import Sidebar from "../components/SideBar";
+import Sidebar from "../components/Sidebar";
 import { formatDistanceToNow } from "date-fns";
 
 const NotificationsPage = () => {
-	const { data: authUser } = useQuery({ queryKey: ["authUser"] });
+	const { data: authUser } = useQuery({ 
+		queryKey: ["authUser"],
+		queryFn: async () => {
+		  try {
+		    const res = await axiosInstance.get("/auth/me");
+		    return res.data;
+		  } catch (err) {
+		    if (err.response && err.response.status === 401) {
+		      return null;
+		    }
+		    throw err;
+		  }
+		},
+	});
 
 	const queryClient = useQueryClient();
 
@@ -40,6 +53,12 @@ const NotificationsPage = () => {
 				return <MessageSquare className='text-green-500' />;
 			case "connectionAccepted":
 				return <UserPlus className='text-purple-500' />;
+			case "applicationApplied":
+				return <Briefcase className='text-blue-500' />;
+			case "applicationAccepted":
+				return <CheckCircle className='text-green-500' />;
+			case "applicationRejected":
+				return <XCircle className='text-red-500' />;
 			default:
 				return null;
 		}
@@ -69,6 +88,24 @@ const NotificationsPage = () => {
 							{notification.relatedUser.name}
 						</Link>{" "}
 						accepted your connection request
+					</span>
+				);
+			case "applicationApplied":
+				return (
+					<span>
+						You applied for <strong>{notification.relatedJob?.title || 'a job'}</strong>
+					</span>
+				);
+			case "applicationAccepted":
+				return (
+					<span>
+						Your application for <strong>{notification.relatedJob?.title || 'a job'}</strong> was accepted
+					</span>
+				);
+			case "applicationRejected":
+				return (
+					<span>
+						Your application for <strong>{notification.relatedJob?.title || 'a job'}</strong> was rejected
 					</span>
 				);
 			default:
@@ -117,13 +154,23 @@ const NotificationsPage = () => {
 								>
 									<div className='flex items-start justify-between'>
 										<div className='flex items-center space-x-4'>
-											<Link to={`/profile/${notification.relatedUser.username}`}>
-												<img
-													src={notification.relatedUser.profilePicture || "/avatar.png"}
-													alt={notification.relatedUser.name}
-													className='w-12 h-12 rounded-full object-cover'
-												/>
-											</Link>
+											{notification.relatedUser ? (
+												<Link to={`/profile/${notification.relatedUser.username}`}>
+													<img
+														src={notification.relatedUser.profilePicture || "/avatar.png"}
+														alt={notification.relatedUser.name}
+														className='w-12 h-12 rounded-full object-cover'
+														loading='lazy'
+														decoding='async'
+														width={48}
+														height={48}
+													/>
+												</Link>
+											) : (
+												<div className='w-12 h-12 rounded-full bg-base-300 flex items-center justify-center'>
+													<Briefcase className='text-info' />
+												</div>
+											)}
 
 											<div>
 												<div className='flex items-center gap-2'>

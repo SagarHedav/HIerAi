@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../../lib/axios";
 import { toast } from "react-hot-toast";
@@ -9,9 +9,21 @@ const SignUpForm = () => {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState("student");
   const [phoneNumber, setPhoneNumber] = useState("");
   const queryClient = useQueryClient();
+  const [oauth, setOauth] = useState({ google: false, twitter: false })
+
+  useEffect(() => {
+    let mounted = true
+    axiosInstance.get('/auth/providers').then(res => {
+      if (mounted) setOauth({
+        google: !!res.data?.google,
+        twitter: !!res.data?.twitter,
+      })
+    }).catch(() => { /* ignore */ })
+    return () => { mounted = false }
+  }, [])
 
   const { mutate: signUpMutation, isLoading } = useMutation({
     mutationFn: async (data) => {
@@ -42,14 +54,15 @@ const SignUpForm = () => {
         className='input input-bordered w-full bg-base-100 text-gray-100'
         required
       />
-      <input
-        type='text'
-        placeholder='Role'
+      <select
         value={role}
         onChange={(e) => setRole(e.target.value)}
-        className='input input-bordered w-full bg-base-100 text-gray-100'
+        className='select select-bordered w-full bg-base-100 text-gray-100'
         required
-      />
+      >
+        <option value='student'>Student</option>
+        <option value='recruiter'>Recruiter</option>
+      </select>
       <input
         type='text'
         placeholder='phone number'
@@ -85,6 +98,25 @@ const SignUpForm = () => {
       <button type='submit' disabled={isLoading} className='btn btn-primary w-full text-white'>
         {isLoading ? <Loader className='size-5 animate-spin' /> : "Agree & Join"}
       </button>
+      <div className='divider'>or</div>
+      <div className='flex flex-col gap-2'>
+        <button type='button' className='btn btn-outline w-full' disabled={!oauth.google}
+          onClick={() => {
+            if (!oauth.google) return
+            const r = role || 'student'
+            const ORIGIN = import.meta.env.MODE === 'development' ? 'http://localhost:3001' : ''
+            window.location.href = `${ORIGIN}/api/v1/auth/google?role=${encodeURIComponent(r)}`
+          }}
+        >Continue with Google</button>
+        <button type='button' className='btn btn-outline w-full' disabled={!oauth.twitter}
+          onClick={() => {
+            if (!oauth.twitter) return
+            const r = role || 'student'
+            const ORIGIN = import.meta.env.MODE === 'development' ? 'http://localhost:3001' : ''
+            window.location.href = `${ORIGIN}/api/v1/auth/twitter?role=${encodeURIComponent(r)}`
+          }}
+        >Continue with Twitter</button>
+      </div>
     </form>
   );
 };

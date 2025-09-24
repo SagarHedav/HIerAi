@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
-import { Link } from "react-router-dom";
-import { Check, Clock, UserCheck, UserPlus, X } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Check, Clock, UserCheck, UserPlus, X, MessageCircle } from "lucide-react";
 
-const RecommendedUser = ({ user }) => {
+const RecommendedUser = ({ user, compact = false }) => {
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     const { data: connectionStatus, isLoading } = useQuery({
         queryKey: ["connectionStatus", user._id],
@@ -95,11 +96,12 @@ const RecommendedUser = ({ user }) => {
             default:
                 return (
                     <button
-                        className='px-3 py-1 rounded-full text-sm border border-primary text-primary hover:bg-primary hover:text-white transition-colors duration-200 flex items-center'
+                        className='btn btn-circle btn-ghost btn-xs p-0'
+                        title='Connect'
+                        aria-label='Connect'
                         onClick={handleConnect}
                     >
-                        <UserPlus size={16} className='mr-1' />
-                        Connect
+                        <UserPlus size={14} />
                     </button>
                 );
         }
@@ -110,6 +112,30 @@ const RecommendedUser = ({ user }) => {
             sendConnectionRequest(user._id);
         }
     };
+
+    if (compact) {
+        // Compact horizontal card for mobile carousel
+        return (
+            <div className='w-32 bg-base-300 rounded-lg p-3 flex flex-col items-center text-center'>
+                <Link to={`/profile/${user.username}`} className='flex flex-col items-center'>
+                    <img src={user.profilePicture || "/avatar.png"} alt={user.name} className='w-14 h-14 rounded-full mb-2 object-cover' />
+                    <h3 className='font-medium text-sm line-clamp-1'>{user.name}</h3>
+                    <p className='text-[10px] text-info line-clamp-2 h-8'>{user.headline}</p>
+                </Link>
+                <div className='mt-2 flex items-center gap-2'>
+                    {renderButton()}
+                    <button className='btn btn-circle btn-ghost btn-xs p-0' title='Message' aria-label='Message' onClick={async ()=>{
+                        try {
+                            const res = await axiosInstance.post(`/messages/conversations/with/${user._id}`)
+                            navigate('/messages', { state: { openConvoId: res.data._id, newConvo: res.data } })
+                        } catch (e) {}
+                    }}>
+                        <MessageCircle size={14} />
+                    </button>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className='flex items-center justify-between mb-4'>
@@ -124,7 +150,17 @@ const RecommendedUser = ({ user }) => {
                     <p className='text-xs text-info'>{user.headline}</p>
                 </div>
             </Link>
-            {renderButton()}
+            <div className='flex gap-2'>
+              {renderButton()}
+              <button className='btn btn-circle btn-ghost btn-xs p-0' title='Message' aria-label='Message' onClick={async ()=>{
+                try {
+                  const res = await axiosInstance.post(`/messages/conversations/with/${user._id}`)
+                  navigate('/messages', { state: { openConvoId: res.data._id, newConvo: res.data } })
+                } catch (e) {}
+              }}>
+                <MessageCircle size={14} />
+              </button>
+            </div>
         </div>
     );
 };

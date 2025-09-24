@@ -1,12 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { axiosInstance } from "../lib/axios";
-import Sidebar from "../components/SideBar";
+import Sidebar from "../components/Sidebar";
 import Post from "../components/Post";
 
 const PostPage = () => {
 	const { postId } = useParams();
-	const { data: authUser } = useQuery({ queryKey: ["authUser"] });
+	const { data: authUser } = useQuery({ 
+		queryKey: ["authUser"],
+		queryFn: async () => {
+		  try {
+		    const res = await axiosInstance.get("/auth/me");
+		    return res.data;
+		  } catch (err) {
+		    if (err.response && err.response.status === 401) {
+		      return null;
+		    }
+		    throw err;
+		  }
+		},
+	});
 
 	const { data: post, isLoading } = useQuery({
 		queryKey: ["post", postId],

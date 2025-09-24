@@ -20,15 +20,15 @@ const SignUpPage = () => {
 								<div className='w-full border-t border-gray-300'></div>
 							</div>
 							<div className='relative flex justify-center text-sm'>
-								<span className='px-2 bg-white text-gray-500'>Already on LinkedIn?</span>
+								<span className='px-2 bg-base-100 text-gray-500'>Already on HIerAi?</span>
 							</div>
 						</div>
 						<div className='mt-6'>
-						<Link to='/login'>
-							<button className='btn btn-soft w-full flex justify-center py-2 px-4 '>
-								Sign in
-							</button>
-						</Link>
+							<Link to='/login'>
+								<button className='btn btn-soft w-full flex justify-center py-2 px-4 '>
+									Sign in
+								</button>
+							</Link>
 						</div>
 					</div>
 				</div>

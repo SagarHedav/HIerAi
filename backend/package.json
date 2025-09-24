@@ -8,20 +8,39 @@
     "dev": "nodemon server.js",
     "start": "node server.js"
   },
-  "keywords": ["nodejs", "express", "mongodb", "jwt", "api"],
+  "keywords": [
+    "nodejs",
+    "express",
+    "mongodb",
+    "jwt",
+    "api"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google/generative-ai": "^0.15.0",
     "bcryptjs": "^3.0.2",
+    "body-parser": "^1.20.3",
     "cloudinary": "^2.6.0",
+    "compression": "^1.7.5",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "datauri": "^4.1.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "iconv-lite": "^0.6.3",
     "jsonwebtoken": "^9.0.2",
     "mailtrap": "^4.0.0",
-    "mongoose": "^8.12.1"
+    "mammoth": "^1.11.0",
+    "mongoose": "^8.12.1",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.3",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-twitter": "^1.0.4",
+    "pdf-parse": "^1.1.1",
+    "raw-body": "^2.5.2",
+    "socket.io": "^4.7.5"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
